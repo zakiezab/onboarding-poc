@@ -124,6 +124,14 @@ function sseToolCallsChunk(
   return sseChunk(id, model, delta, null);
 }
 
+// TEMP debug capture — last 5 raw request bodies, inspectable via GET. Remove
+// once the tool-calling follow-up-request bug is diagnosed.
+const debugLog: unknown[] = [];
+
+export async function GET() {
+  return NextResponse.json({ debugLog });
+}
+
 export async function POST(req: NextRequest) {
   if (!API_KEY) {
     return NextResponse.json({ error: 'ANTHROPIC_API_KEY must be set' }, { status: 500 });
@@ -135,6 +143,9 @@ export async function POST(req: NextRequest) {
   } catch {
     return NextResponse.json({ error: 'Body must be JSON' }, { status: 400 });
   }
+
+  debugLog.push(body);
+  if (debugLog.length > 5) debugLog.shift();
 
   const { messages, stream, tools } = body;
   if (!Array.isArray(messages) || messages.length === 0) {
@@ -222,6 +233,7 @@ same turn as the call, since you won't get a second turn to narrate it afterward
         controller.enqueue(encoder.encode('data: [DONE]\n\n'));
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Unknown error';
+        debugLog.push({ ERROR: message, anthropicMessages });
         controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: message })}\n\n`));
       } finally {
         controller.close();
