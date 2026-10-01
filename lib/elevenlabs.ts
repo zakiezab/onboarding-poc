@@ -72,6 +72,19 @@ export function toWordTimings(alignment: ElevenLabsAlignment): WordTiming {
 }
 
 /**
+ * Shift every word's start time by a fixed offset (in ms) — unlike wtimes
+ * from a single speakAudio() call, consecutive streamAudio() chunks each
+ * report alignment relative to their own start, but TalkingHead schedules a
+ * whole turn's chunks against one fixed anchor set at the turn's first
+ * chunk (see RealtimeConversation's streamElapsedMsRef for why this
+ * matters). wdurations don't need shifting, only wtimes.
+ */
+export function offsetWordTimings(timing: WordTiming, offsetMs: number): WordTiming {
+  if (offsetMs === 0) return timing;
+  return { ...timing, wtimes: timing.wtimes.map((t) => t + offsetMs) };
+}
+
+/**
  * Realtime alignment shape from the Conversational AI WebSocket's
  * audio_event.alignment — same idea as ElevenLabsAlignment above, but
  * milliseconds + duration instead of seconds + start/end, because it's a

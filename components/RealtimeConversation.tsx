@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { TalkingAvatarHandle } from '@/components/TalkingAvatar';
-import { toWordTimingsFromRealtimeAlignment, type RealtimeAlignment } from '@/lib/elevenlabs';
+import { toWordTimingsFromRealtimeAlignment, offsetWordTimings, type RealtimeAlignment } from '@/lib/elevenlabs';
 import type { ReferenceVariant } from '@/components/ReferencePanel';
 import { theme as t } from '@/lib/theme';
 
@@ -75,6 +75,10 @@ export default function RealtimeConversation({
   const micAnalyserRef = useRef<AnalyserNode | null>(null);
   const micStreamRef = useRef<MediaStream | null>(null);
   const agentSpeakingRef = useRef(false);
+  // Cumulative audio duration (ms) of this turn's chunks so far — see the
+  // 'audio' case below for why streamAudio() needs this added to each
+  // chunk's word times.
+  const streamElapsedMsRef = useRef(0);
 
   const setAgentSpeaking = useCallback(
     (speaking: boolean) => {
@@ -232,14 +236,31 @@ export default function RealtimeConversation({
               alignment?: RealtimeAlignment;
             };
             const pcm = base64ToArrayBuffer(audio_base_64);
-            const words = alignment ? toWordTimingsFromRealtimeAlignment(alignment) : undefined;
             // Streaming has no "new sentence" event of its own — chunks just
             // keep arriving — so the first chunk since the agent was last
             // silent is what marks a new turn, and that's when the caption
-            // line from the previous turn should clear.
+            // line from the previous turn should clear and the offset below
+            // should restart from zero.
             if (!agentSpeakingRef.current) {
               avatarRef.current?.resetCaption();
+              streamElapsedMsRef.current = 0;
             }
+            // Each audio_event's alignment is relative to THAT chunk's own
+            // start (confirmed against real traffic — char_start_times_ms[0]
+            // is always 0), but TalkingHead schedules every chunk of a turn
+            // against one fixed anchor set at the turn's first chunk, not a
+            // rolling one — see streamAudio()/_processLipsyncData in
+            // talkinghead.mjs. Without adding this turn-relative offset,
+            // every chunk after the first gets scheduled as if it started
+            // playing at the very beginning of the turn, so captions (and
+            // lip-sync) race ahead of the actual audio more with every chunk.
+            const words = alignment
+              ? offsetWordTimings(toWordTimingsFromRealtimeAlignment(alignment), streamElapsedMsRef.current)
+              : undefined;
+            // PCM16 mono at the format conversation_initiation_metadata
+            // declared (agent_output_audio_format: "pcm_16000") — 2 bytes/
+            // sample, 16000 samples/sec, so duration_ms = bytes / 32.
+            streamElapsedMsRef.current += pcm.byteLength / 32;
             avatarRef.current?.streamAudio(pcm, words);
             setAgentSpeaking(true);
             break;
