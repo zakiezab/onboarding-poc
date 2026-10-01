@@ -3,7 +3,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { TalkingAvatarHandle } from '@/components/TalkingAvatar';
 import { toWordTimingsFromRealtimeAlignment, type RealtimeAlignment } from '@/lib/elevenlabs';
+import type { ReferenceVariant } from '@/components/ReferencePanel';
 import { theme as t } from '@/lib/theme';
+
+// The one client tool this agent is expected to have (configured in the
+// ElevenLabs dashboard, not here — see its "Tools" section). Checked against
+// this allowlist before touching page.tsx's state, since the parameter value
+// is dashboard-configured text, not something our own types can constrain.
+const REFERENCE_VARIANTS: ReadonlySet<string> = new Set(['presentation', 'video', 'org-chart', 'people']);
 
 // Wire formats verified directly against ElevenLabs' docs before writing this
 // (see the FSD's own instruction not to guess vendor APIs) — server messages
@@ -22,6 +29,8 @@ type Props = {
    *  own, since mic input goes to the WebSocket, never through TalkingHead. */
   onMicAnalyser?: (analyser: AnalyserNode | null) => void;
   onAgentSpeakingChange?: (speaking: boolean) => void;
+  /** The agent called its show_reference client tool — see REFERENCE_VARIANTS. */
+  onShowReference?: (variant: ReferenceVariant) => void;
 };
 
 function base64ToArrayBuffer(base64: string): ArrayBuffer {
@@ -55,6 +64,7 @@ export default function RealtimeConversation({
   onLiveChange,
   onMicAnalyser,
   onAgentSpeakingChange,
+  onShowReference,
 }: Props) {
   const [state, setState] = useState<ConnState>('idle');
   const [error, setError] = useState<string | null>(null);
@@ -177,6 +187,45 @@ export default function RealtimeConversation({
             }
             break;
           }
+          case 'client_tool_call': {
+            // Wire format verified against ElevenLabs' client-events docs —
+            // not the SDK's clientTools callback shape, since this component
+            // talks the raw WebSocket protocol directly (see the file-top note).
+            const { tool_name, tool_call_id, parameters } = msg.client_tool_call as {
+              tool_name: string;
+              tool_call_id: string;
+              parameters?: Record<string, unknown>;
+            };
+
+            if (tool_name === 'show_reference') {
+              const variant = parameters?.type;
+              if (typeof variant === 'string' && REFERENCE_VARIANTS.has(variant)) {
+                onShowReference?.(variant as ReferenceVariant);
+                ws.send(
+                  JSON.stringify({ type: 'client_tool_result', tool_call_id, result: 'shown', is_error: false }),
+                );
+              } else {
+                ws.send(
+                  JSON.stringify({
+                    type: 'client_tool_result',
+                    tool_call_id,
+                    result: `Unknown reference type "${String(variant)}"`,
+                    is_error: true,
+                  }),
+                );
+              }
+            } else {
+              ws.send(
+                JSON.stringify({
+                  type: 'client_tool_result',
+                  tool_call_id,
+                  result: `Unknown tool "${tool_name}"`,
+                  is_error: true,
+                }),
+              );
+            }
+            break;
+          }
           case 'audio': {
             const { audio_base_64, alignment } = msg.audio_event as {
               audio_base_64: string;
@@ -213,7 +262,7 @@ export default function RealtimeConversation({
       setError(err instanceof Error ? err.message : 'Could not start the live conversation.');
       setState('error');
     }
-  }, [avatarRef, onLiveChange, onMicAnalyser, setAgentSpeaking]);
+  }, [avatarRef, onLiveChange, onMicAnalyser, onShowReference, setAgentSpeaking]);
 
   return (
     <div style={s.wrap}>

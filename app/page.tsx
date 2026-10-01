@@ -98,6 +98,15 @@ export default function OnboardingPage() {
   // later pass, not this one.
   const [micAnalyser, setMicAnalyser] = useState<AnalyserNode | null>(null);
   const [agentSpeaking, setAgentSpeaking] = useState(false);
+  // What the live voice bot last asked to show (via its show_reference client
+  // tool) — a separate signal from PANEL_VISUALS, which is tied to the
+  // scripted beat and doesn't apply once live mode takes over. Reset on
+  // every fresh live session so a stale chart from last time doesn't linger.
+  const [liveReferenceVariant, setLiveReferenceVariant] = useState<ReferenceVariant>(null);
+  const handleLiveChange = useCallback((live: boolean) => {
+    setLiveMode(live);
+    if (live) setLiveReferenceVariant(null);
+  }, []);
 
   // The 3D avatar stays mounted (for its audio/lip-sync engine — TTS
   // playback and the orb's analyser both come from it) but is never shown;
@@ -286,8 +295,11 @@ export default function OnboardingPage() {
             </div>
           )}
 
-          {hire && started && !liveMode && (
-            <ReferencePanel variant={PANEL_VISUALS[beat.id] ?? null} hire={hire} />
+          {hire && started && (
+            <ReferencePanel
+              variant={liveMode ? liveReferenceVariant : (PANEL_VISUALS[beat.id] ?? null)}
+              hire={hire}
+            />
           )}
 
           <div style={s.progressBar}>
@@ -359,9 +371,10 @@ export default function OnboardingPage() {
             {started && (
               <RealtimeConversation
                 avatarRef={avatarRef}
-                onLiveChange={setLiveMode}
+                onLiveChange={handleLiveChange}
                 onMicAnalyser={setMicAnalyser}
                 onAgentSpeakingChange={setAgentSpeaking}
+                onShowReference={setLiveReferenceVariant}
               />
             )}
 
