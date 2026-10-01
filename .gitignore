@@ -36,6 +36,9 @@ yarn-error.log*
 # vercel
 .vercel
 
+# one-off generated deliverables (brag video pipeline render output), not app source
+/brag-output
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

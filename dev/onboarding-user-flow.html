@@ -1,0 +1,557 @@
+<title>Mobizinc Onboarding Flow</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@500;600;700&family=Public+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap');
+
+  :root {
+    --bg: #08080a;
+    --surface: #111114;
+    --surface-2: #16161a;
+    --border: rgba(255, 255, 255, 0.09);
+    --border-strong: rgba(255, 255, 255, 0.16);
+    --ink: #f4f4f6;
+    --ink-muted: #a3a3ac;
+    --ink-faint: #6b6b74;
+    --accent: #ff3b30;
+    --accent-soft: #ff6259;
+    --accent-glow: rgba(255, 59, 48, 0.45);
+    --accent-dim: rgba(255, 59, 48, 0.12);
+
+    --font-display: 'Schibsted Grotesk', system-ui, sans-serif;
+    --font-body: 'Public Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    background-image:
+      radial-gradient(900px 480px at 78% -6%, rgba(255, 59, 48, 0.08), transparent 60%),
+      radial-gradient(700px 420px at 6% 10%, rgba(255, 59, 48, 0.04), transparent 55%);
+    color: var(--ink);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    padding: 4.5rem 1.5rem 6rem;
+  }
+
+  a { color: inherit; }
+
+  .wrap {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  /* ---------- header ---------- */
+
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.09em;
+    color: var(--accent-soft);
+    text-transform: uppercase;
+    margin: 0 0 1.1rem;
+  }
+  .eyebrow::before {
+    content: '';
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 10px var(--accent-glow);
+  }
+
+  h1 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(2rem, 4.4vw, 2.9rem);
+    line-height: 1.08;
+    letter-spacing: -0.015em;
+    margin: 0 0 1rem;
+    text-wrap: balance;
+  }
+
+  .dek {
+    font-size: 1.05rem;
+    line-height: 1.65;
+    color: var(--ink-muted);
+    max-width: 62ch;
+    margin: 0 0 1.75rem;
+  }
+
+  .dek b { color: var(--ink); font-weight: 600; }
+
+  .meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+    margin-bottom: 3.5rem;
+  }
+  .meta-pill {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.02em;
+    color: var(--ink-faint);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 0.3rem 0.7rem;
+  }
+  .meta-pill em { color: var(--ink-muted); font-style: normal; }
+
+  /* ---------- spine layout ---------- */
+
+  .flow {
+    position: relative;
+  }
+
+  .rail {
+    position: absolute;
+    left: 21px;
+    top: 10px;
+    bottom: 10px;
+    width: 2px;
+    background: linear-gradient(180deg, var(--accent-glow), var(--border) 12%, var(--border) 88%, transparent);
+  }
+
+  .stage {
+    position: relative;
+    display: grid;
+    grid-template-columns: 44px 1fr;
+    gap: 0 1.4rem;
+    margin-bottom: 2.1rem;
+  }
+
+  .stage-marker {
+    position: relative;
+    z-index: 1;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--surface);
+    border: 1.5px solid var(--border-strong);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--ink-muted);
+  }
+  .stage.is-primary .stage-marker {
+    border-color: var(--accent);
+    color: var(--accent-soft);
+    box-shadow: 0 0 0 4px var(--accent-dim);
+  }
+
+  .stage-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.5rem 1.6rem 1.65rem;
+  }
+
+  .stage-label {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0 0 0.35rem;
+  }
+
+  .stage-title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.32rem;
+    letter-spacing: -0.01em;
+    margin: 0 0 0.6rem;
+    text-wrap: balance;
+  }
+
+  .stage-body {
+    font-size: 0.96rem;
+    line-height: 1.6;
+    color: var(--ink-muted);
+    margin: 0;
+  }
+  .stage-body + .stage-body { margin-top: 0.6rem; }
+  .stage-body b { color: var(--ink); font-weight: 600; }
+
+  .screen-quote {
+    font-family: var(--font-display);
+    font-size: 1.02rem;
+    font-weight: 500;
+    color: var(--ink);
+    background: var(--surface-2);
+    border-left: 2px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+    padding: 0.65rem 0.9rem;
+    margin: 0.9rem 0;
+  }
+  .screen-quote span { color: var(--ink-faint); font-family: var(--font-body); font-size: 0.82rem; display: block; margin-top: 0.15rem; }
+
+  .action-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    color: var(--accent-soft);
+    background: var(--accent-dim);
+    border-radius: 6px;
+    padding: 0.22rem 0.55rem;
+    margin-top: 0.7rem;
+  }
+  .action-tag::before { content: '→'; }
+
+  /* ---------- beat chain (inside stage 4) ---------- */
+
+  .beat-chain {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem;
+    margin: 1rem 0 1.15rem;
+  }
+  .beat {
+    font-family: var(--font-mono);
+    font-size: 0.76rem;
+    color: var(--ink);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 0.34rem 0.6rem;
+    white-space: nowrap;
+  }
+  .beat-arrow { color: var(--ink-faint); font-size: 0.8rem; }
+
+  .fact-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 0.7rem;
+    margin-top: 1.1rem;
+  }
+  .fact {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.75rem 0.85rem;
+  }
+  .fact-h {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0 0 0.35rem;
+  }
+  .fact-b { font-size: 0.86rem; line-height: 1.5; color: var(--ink-muted); margin: 0; }
+  .fact-b b { color: var(--ink); font-weight: 600; }
+
+  .checklist-note {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.1rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px dashed var(--border);
+  }
+  .checklist-item {
+    display: flex;
+    align-items: baseline;
+    gap: 0.4rem;
+    font-size: 0.82rem;
+    color: var(--ink-muted);
+  }
+  .checklist-item b {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--accent-soft);
+    font-weight: 500;
+  }
+
+  /* ---------- branch (live conversation) ---------- */
+
+  .branch-wrap {
+    position: relative;
+    margin: -0.4rem 0 2.1rem 44px;
+    padding-left: 1.4rem;
+  }
+  .branch-connector {
+    position: absolute;
+    left: -2px;
+    top: -1.05rem;
+    width: 34px;
+    height: 2.55rem;
+    border-left: 2px dashed var(--accent-glow);
+    border-bottom: 2px dashed var(--accent-glow);
+    border-bottom-left-radius: 14px;
+  }
+  .branch-card {
+    background: linear-gradient(180deg, var(--accent-dim), transparent 130%), var(--surface);
+    border: 1px solid rgba(255, 59, 48, 0.28);
+    border-radius: 16px;
+    padding: 1.35rem 1.5rem 1.5rem;
+  }
+  .branch-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--accent-soft);
+    margin: 0 0 0.55rem;
+  }
+  .branch-label::before { content: '⤷'; font-family: var(--font-body); }
+  .branch-title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.15rem;
+    margin: 0 0 0.55rem;
+  }
+  .branch-flow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0.9rem 0 0.2rem;
+    font-family: var(--font-mono);
+    font-size: 0.76rem;
+    color: var(--ink-muted);
+  }
+  .branch-flow .node {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 0.32rem 0.7rem;
+    color: var(--ink);
+  }
+
+  /* ---------- persistent state note ---------- */
+
+  .persist {
+    margin: 0.5rem 0 3rem 44px;
+    padding-left: 1.4rem;
+    padding-top: 0.2rem;
+  }
+  .persist-title {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0 0 0.6rem;
+  }
+  .persist-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 0.6rem;
+  }
+  .persist-item {
+    border: 1px dashed var(--border);
+    border-radius: 10px;
+    padding: 0.7rem 0.85rem;
+    font-size: 0.84rem;
+    line-height: 1.5;
+    color: var(--ink-muted);
+  }
+  .persist-item b { color: var(--ink); font-weight: 600; display: block; margin-bottom: 0.15rem; font-size: 0.86rem; }
+
+  /* ---------- footer ---------- */
+
+  footer {
+    margin-top: 3.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    font-size: 0.82rem;
+    color: var(--ink-faint);
+    line-height: 1.6;
+  }
+  footer code {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--ink-muted);
+  }
+
+  @media (max-width: 620px) {
+    .stage { grid-template-columns: 34px 1fr; }
+    .stage-marker { width: 34px; height: 34px; font-size: 0.82rem; }
+    .rail { left: 16px; }
+    .branch-wrap, .persist { margin-left: 34px; }
+  }
+</style>
+
+<div class="wrap">
+
+  <p class="eyebrow">User flow · Onboarding POC</p>
+  <h1>How a new hire gets onboarded by an AI voice guide</h1>
+  <p class="dek">
+    From a unique HR invite link to a completed first morning — narrated end to end by a
+    speaking orb, with a live voice-conversation branch available the whole way through.
+  </p>
+  <div class="meta-row">
+    <span class="meta-pill">Product: <em>Mobizinc Onboarding</em></span>
+    <span class="meta-pill">Example hire: <em>Tom John</em></span>
+    <span class="meta-pill">Example department: <em>Creative &amp; Multimedia</em></span>
+    <span class="meta-pill">5 stages · 8 walkthrough beats · 1 branch</span>
+  </div>
+
+  <div class="flow">
+    <div class="rail" aria-hidden="true"></div>
+
+    <!-- 1 -->
+    <div class="stage">
+      <div class="stage-marker">1</div>
+      <div class="stage-card">
+        <p class="stage-label">Entry</p>
+        <h2 class="stage-title">Invite link opens, already personalised</h2>
+        <p class="stage-body">
+          Every hire gets a <b>unique link</b> from HR. Opening it resolves straight to their
+          name and department — nothing is typed in at this stage.
+        </p>
+        <div class="screen-quote">
+          “You&rsquo;re invited, Tom John.”
+          <span>This link is yours — it already knows you&rsquo;re joining Creative &amp; Multimedia.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2 -->
+    <div class="stage">
+      <div class="stage-marker">2</div>
+      <div class="stage-card">
+        <p class="stage-label">Identity</p>
+        <h2 class="stage-title">Sign in with Microsoft</h2>
+        <p class="stage-body">
+          A single button, styled after Microsoft&rsquo;s own sign-in convention. No credentials
+          are collected — it&rsquo;s a stand-in for the SSO check a real deployment would run.
+        </p>
+        <span class="action-tag">taps “Login using Microsoft”</span>
+      </div>
+    </div>
+
+    <!-- 3 -->
+    <div class="stage">
+      <div class="stage-marker">3</div>
+      <div class="stage-card">
+        <p class="stage-label">Gate</p>
+        <h2 class="stage-title">Good morning, and a deliberate first tap</h2>
+        <p class="stage-body">
+          Browsers block audio until a person acts, so the walkthrough can&rsquo;t just autoplay.
+          This screen exists to be that one required gesture.
+        </p>
+        <div class="screen-quote">
+          “Good morning, Tom John.”
+          <span>Your accounts are ready. Your guide will walk you through the rest — about fifteen minutes, with sound.</span>
+        </div>
+        <span class="action-tag">taps “Start onboarding”</span>
+      </div>
+    </div>
+
+    <!-- 4: primary -->
+    <div class="stage is-primary">
+      <div class="stage-marker">4</div>
+      <div class="stage-card">
+        <p class="stage-label">The walkthrough</p>
+        <h2 class="stage-title">The orb speaks, eight beats in order</h2>
+        <p class="stage-body">
+          Each beat plays as one continuous, natural-sounding line — captioned live underneath,
+          word by word, as it&rsquo;s spoken.
+        </p>
+
+        <div class="beat-chain" aria-label="the eight beats, in order">
+          <span class="beat">Welcome</span><span class="beat-arrow">›</span>
+          <span class="beat">Your accounts</span><span class="beat-arrow">›</span>
+          <span class="beat">What we do</span><span class="beat-arrow">›</span>
+          <span class="beat">How we work</span><span class="beat-arrow">›</span>
+          <span class="beat">Your department</span><span class="beat-arrow">›</span>
+          <span class="beat">Your people</span><span class="beat-arrow">›</span>
+          <span class="beat">Your first week</span><span class="beat-arrow">›</span>
+          <span class="beat">Getting help</span>
+        </div>
+
+        <div class="fact-grid">
+          <div class="fact">
+            <p class="fact-h">Say that again</p>
+            <p class="fact-b">Replays the <b>current</b> beat from the start.</p>
+          </div>
+          <div class="fact">
+            <p class="fact-h">Continue</p>
+            <p class="fact-b">Cuts off the guide mid-sentence if needed, then plays the <b>next</b> beat.</p>
+          </div>
+          <div class="fact">
+            <p class="fact-h">Follow-up chips</p>
+            <p class="fact-b">Beat-specific questions, e.g. <b>“Who else is on the team?”</b> — the guide answers, grounded in the HR docs, then the beat&rsquo;s own controls return.</p>
+          </div>
+          <div class="fact">
+            <p class="fact-h">Your department</p>
+            <p class="fact-b">The one beat that&rsquo;s different per hire — reads the actual <b>Creative &amp; Multimedia</b> team brief aloud.</p>
+          </div>
+        </div>
+
+        <div class="checklist-note" aria-label="which beats complete which progress item">
+          <span class="checklist-item"><b>01</b>Your accounts → Accounts and tools</span>
+          <span class="checklist-item"><b>02</b>How we work → How Mobizinc works</span>
+          <span class="checklist-item"><b>03</b>Your department → Your department</span>
+          <span class="checklist-item"><b>04</b>Your first week → Your first week</span>
+          <span class="checklist-item"><b>05</b>Getting help → Where to get help</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- branch off stage 4 -->
+    <div class="branch-wrap">
+      <div class="branch-connector" aria-hidden="true"></div>
+      <div class="branch-card">
+        <p class="branch-label">Optional, any beat</p>
+        <h3 class="branch-title">Live conversation</h3>
+        <p class="stage-body">
+          One tap on the mic hands the orb over to a real-time, two-way voice call — the same
+          guide, but now actually listening. Speaking over it cuts it off mid-sentence
+          (<b>barge-in</b>), the way interrupting a person would.
+        </p>
+        <div class="branch-flow">
+          <span class="node">tap mic</span><span>→</span>
+          <span class="node">live call opens</span><span>→</span>
+          <span class="node">ask anything, interrupt freely</span><span>→</span>
+          <span class="node">tap mic again</span><span>→</span>
+          <span>back to the exact beat it left</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5 -->
+    <div class="stage">
+      <div class="stage-marker">5</div>
+      <div class="stage-card">
+        <p class="stage-label">End of walkthrough</p>
+        <h2 class="stage-title">“Getting help” finishes the sequence</h2>
+        <p class="stage-body">
+          After the eighth beat, <b>Continue</b> relabels itself <b>Finished</b> and disables —
+          there&rsquo;s nowhere further to advance to. The progress rail reads 100%.
+        </p>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="persist">
+    <p class="persist-title">On screen the whole time (stages 4–5)</p>
+    <div class="persist-grid">
+      <div class="persist-item"><b>The orb</b>Reacts to whoever is talking — the guide during the walkthrough, either side during a live call. No 3D avatar is shown; the orb is the entire visual presence.</div>
+      <div class="persist-item"><b>Progress rail</b>Five checklist items, filling in as the matching beat finishes — visible at every stage, never just at the end.</div>
+      <div class="persist-item"><b>Live caption</b>The line currently being spoken, highlighted word by word, capped to four lines with auto-scroll.</div>
+    </div>
+  </div>
+
+  <footer>
+    Reflects the current build of the onboarding POC. The invite link and department
+    (<code>Tom John</code> / <code>Creative &amp; Multimedia</code>) are hardcoded for this
+    proof of concept — a shipped version would decode both from the link itself.
+  </footer>
+
+</div>

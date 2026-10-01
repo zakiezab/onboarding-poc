@@ -1,13 +1,16 @@
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* Only the theme (CSS vars utilities read) and utilities layers — not
+   preflight. This app already has its own reset/base rules below (unlayered,
+   so they always win over anything in a Tailwind @layer regardless of import
+   order); pulling in preflight too would just be a second, conflicting
+   reset fighting the first. Tailwind is here solely so the two Magic UI
+   registry components in registry/magicui/ have their utility classes. */
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+:root {
+  --background: #08080a;
+  --foreground: #f4f4f6;
+  color-scheme: dark;
 }
 
 html {
@@ -25,8 +28,12 @@ body {
   display: flex;
   flex-direction: column;
   color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  background:
+    radial-gradient(1100px 560px at 82% -8%, rgba(255, 59, 48, 0.10), transparent 60%),
+    radial-gradient(900px 520px at 10% 8%, rgba(255, 59, 48, 0.05), transparent 55%),
+    var(--background);
+  background-attachment: fixed;
+  font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -42,8 +49,255 @@ a {
   text-decoration: none;
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
+::selection {
+  background: rgba(255, 59, 48, 0.35);
+  color: #fff;
+}
+
+*:focus-visible {
+  outline: 2px solid #ff3b30;
+  outline-offset: 2px;
+}
+
+/* Interactive surfaces. Colors/borders live here (not inline) so :hover,
+   :focus and :disabled can actually override them — inline styles beat
+   external rules on specificity, so this is the only way the states work.
+   Layout (padding, gap, radius, font-size) stays inline in the components. */
+
+.card-surface {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #16161a;
+  transition: border-color 180ms cubic-bezier(0.4, 0, 0.2, 1), background 180ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.card-surface:hover {
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+.btn-primary {
+  background: #ff3b30;
+  color: #fff;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 160ms cubic-bezier(0.4, 0, 0.2, 1), box-shadow 160ms cubic-bezier(0.4, 0, 0.2, 1), background 160ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.btn-primary:hover:not(:disabled) {
+  background: #ff564c;
+  box-shadow: 0 4px 24px rgba(255, 59, 48, 0.35);
+  transform: translateY(-1px);
+}
+.btn-primary:active:not(:disabled) {
+  transform: translateY(0);
+}
+.btn-primary:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn-ms {
+  background: #fff;
+  color: #1b1b1f;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 160ms cubic-bezier(0.4, 0, 0.2, 1), box-shadow 160ms cubic-bezier(0.4, 0, 0.2, 1), background 160ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.btn-ms:hover:not(:disabled) {
+  background: #f2f2f2;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+  transform: translateY(-1px);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: #a3a3ac;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 160ms cubic-bezier(0.4, 0, 0.2, 1), color 160ms cubic-bezier(0.4, 0, 0.2, 1), background 160ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.btn-ghost:hover:not(:disabled) {
+  border-color: rgba(255, 255, 255, 0.24);
+  color: #f4f4f6;
+  background: rgba(255, 255, 255, 0.03);
+}
+.btn-ghost:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.chip-btn {
+  background: transparent;
+  color: #a3a3ac;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  transition: border-color 160ms cubic-bezier(0.4, 0, 0.2, 1), background 160ms cubic-bezier(0.4, 0, 0.2, 1), color 160ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.chip-btn:hover:not(:disabled) {
+  border-color: rgba(255, 59, 48, 0.5);
+  background: rgba(255, 59, 48, 0.08);
+  color: #f4f4f6;
+}
+.chip-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.ask-input {
+  background: #111114;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #f4f4f6;
+  transition: border-color 160ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.ask-input::placeholder {
+  color: #6b6b74;
+}
+.ask-input:focus {
+  border-color: rgba(255, 59, 48, 0.55);
+}
+.ask-input:disabled {
+  opacity: 0.5;
+}
+
+.dept-btn {
+  background: #111114;
+  color: #a3a3ac;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  transition: border-color 160ms cubic-bezier(0.4, 0, 0.2, 1), background 160ms cubic-bezier(0.4, 0, 0.2, 1), color 160ms cubic-bezier(0.4, 0, 0.2, 1), transform 160ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.dept-btn:hover {
+  border-color: rgba(255, 59, 48, 0.55);
+  background: rgba(255, 59, 48, 0.08);
+  color: #f4f4f6;
+  transform: translateY(-1px);
+}
+
+.rec-dot {
+  animation: pulse-red 1.4s ease-in-out infinite;
+}
+
+.mic-btn {
+  width: 3.25rem;
+  height: 3.25rem;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #ff3b30;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  transition: transform 160ms cubic-bezier(0.4, 0, 0.2, 1), box-shadow 160ms cubic-bezier(0.4, 0, 0.2, 1), background 160ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.mic-btn:hover:not(:disabled) {
+  background: #ff564c;
+  transform: translateY(-1px);
+}
+.mic-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.mic-btn-live {
+  animation: mic-pulse 1.6s ease-in-out infinite;
+}
+@keyframes mic-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 59, 48, 0.45); }
+  50% { box-shadow: 0 0 0 10px rgba(255, 59, 48, 0); }
+}
+
+.content-pane {
+  animation: pane-in 260ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+@keyframes pane-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Voice orb — a glassy sphere with internal swirling energy, not a flat
+   pulsing dot. Amplitude (--level, 0..1, set every frame from JS) drives only
+   properties that can change smoothly frame-to-frame: glow, opacity, scale.
+   It must NOT drive animation-duration — changing a running CSS animation's
+   own duration 60 times a second doesn't smoothly speed it up, it restarts/
+   jumps the cycle, which is exactly the "too fast, not natural" glitchiness.
+   The swirl's rotation itself stays a fixed, slow, uninterrupted loop; only
+   its brightness responds to audio, so it reads as energy intensifying
+   within a continuous flow rather than the flow itself lurching. */
+.voice-orb-sphere {
+  position: relative;
+  border-radius: 50%;
+  overflow: hidden;
+  isolation: isolate;
+  background: radial-gradient(circle at 32% 28%, #3a0a06 0%, #1a0402 55%, #0a0101 100%);
+  box-shadow:
+    inset 0 0 40px rgba(0, 0, 0, 0.6),
+    inset 0 0 12px rgba(255, 120, 100, 0.25),
+    0 0 calc(24px + 60px * var(--level, 0)) rgba(255, 59, 48, calc(0.35 + 0.4 * var(--level, 0)));
+  transform: scale(calc(1 + 0.05 * var(--level, 0)));
+  transition: box-shadow 120ms linear, transform 120ms linear;
+}
+.voice-orb-swirl-a {
+  position: absolute;
+  inset: -30%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0%,
+    rgba(255, 59, 48, 0.65) 12%,
+    transparent 30%,
+    rgba(255, 130, 110, 0.5) 50%,
+    transparent 68%,
+    rgba(255, 59, 48, 0.55) 86%,
+    transparent 100%
+  );
+  filter: blur(7px);
+  mix-blend-mode: screen;
+  animation: orb-rotate-a 22s linear infinite;
+  opacity: calc(0.5 + 0.5 * var(--level, 0));
+  transition: opacity 150ms linear;
+}
+.voice-orb-swirl-b {
+  position: absolute;
+  inset: -35%;
+  background: conic-gradient(
+    from 160deg,
+    transparent 0%,
+    rgba(255, 150, 130, 0.4) 18%,
+    transparent 42%,
+    rgba(122, 23, 16, 0.6) 65%,
+    transparent 88%
+  );
+  filter: blur(9px);
+  mix-blend-mode: screen;
+  animation: orb-rotate-b 34s linear infinite;
+  opacity: calc(0.4 + 0.45 * var(--level, 0));
+  transition: opacity 150ms linear;
+}
+.voice-orb-highlight {
+  position: absolute;
+  top: 10%;
+  left: 16%;
+  width: 34%;
+  height: 24%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0) 72%);
+  filter: blur(2px);
+}
+.voice-orb-rim {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgba(255, 200, 190, 0.18);
+}
+@keyframes orb-rotate-a {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@keyframes orb-rotate-b {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(-360deg); }
+}
+
+@keyframes pulse-red {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
 }
