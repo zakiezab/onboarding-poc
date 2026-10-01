@@ -55,6 +55,15 @@ function SkipIcon() {
   );
 }
 
+function SpinnerIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true" className="spin-icon">
+      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" strokeOpacity="0.25" />
+      <path d="M21 12a9 9 0 0 0-9-9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 // Mimics a unique per-hire HR invite link, which already knows who's
 // opening it — so there's no spoken/typed name capture or department picker
 // (see MicrosoftLogin). Scoped to this one hire for now; a real link would
@@ -71,6 +80,12 @@ export default function OnboardingPage() {
   const [hire, setHire] = useState<Hire | null>(null);
 
   const [started, setStarted] = useState(false);
+  // True from the "Start onboarding" click until the first beat's audio
+  // actually begins — covers the TTS fetch/decode that used to happen
+  // silently behind the just-revealed (and otherwise static-looking) main
+  // screen. Scoped to the very first beat only: Skip already communicates
+  // "busy" for every beat after that.
+  const [preparing, setPreparing] = useState(false);
   const [beatIndex, setBeatIndex] = useState(0);
   const [done, setDone] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
@@ -105,7 +120,19 @@ export default function OnboardingPage() {
   // words as unspoken, 'advance' promotes the next unspoken word once
   // TalkingHead's own per-word callback says playback has reached it.
   const [captionWords, setCaptionWords] = useState<CaptionWord[]>([]);
+  // Set just before the very first playBeat() call (see start()) and
+  // consumed the moment speak() actually has audio ready to play — TalkingAvatar
+  // fires its 'append' caption action right before calling head.speakAudio(),
+  // which is the earliest reliable "audio is about to start" signal it
+  // exposes. That's when the gate screen hands off to the main view, instead
+  // of on the click itself.
+  const revealOnSpeechRef = useRef(false);
   const handleCaption = useCallback((action: CaptionAction) => {
+    if (action.type === 'append' && revealOnSpeechRef.current) {
+      revealOnSpeechRef.current = false;
+      setPreparing(false);
+      setStarted(true);
+    }
     setCaptionWords((prev) => {
       switch (action.type) {
         case 'reset':
@@ -180,9 +207,18 @@ export default function OnboardingPage() {
 
   const start = useCallback(async () => {
     // Browsers block audio until a user gesture, so the session must begin
-    // behind this button. Do not autoplay on mount.
-    setStarted(true);
+    // behind this button. Do not autoplay on mount. The button itself shows
+    // a loading state until handleCaption's 'append' check flips `started`
+    // — see revealOnSpeechRef above.
+    setPreparing(true);
+    revealOnSpeechRef.current = true;
     await playBeat(0);
+    // Safety net: if speak() never produced an 'append' (e.g. the TTS call
+    // failed before returning any words), don't strand the user on a
+    // stuck loading button — fall through to the main view regardless.
+    revealOnSpeechRef.current = false;
+    setPreparing(false);
+    setStarted(true);
   }, [playBeat]);
 
   const next = useCallback(async () => {
@@ -231,8 +267,21 @@ export default function OnboardingPage() {
                 Your accounts are ready. Your guide will walk you through the rest —
                 about fifteen minutes, with sound.
               </p>
-              <button type="button" onClick={start} style={s.primaryButton} className="btn-primary">
-                Start onboarding
+              <button
+                type="button"
+                onClick={start}
+                disabled={preparing}
+                style={preparing ? { ...s.primaryButton, opacity: 1 } : s.primaryButton}
+                className="btn-primary"
+              >
+                {preparing ? (
+                  <>
+                    <SpinnerIcon />
+                    Preparing your guide…
+                  </>
+                ) : (
+                  'Start onboarding'
+                )}
               </button>
             </div>
           )}
