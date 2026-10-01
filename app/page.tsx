@@ -104,13 +104,8 @@ export default function OnboardingPage() {
   // every fresh live session so a stale chart from last time doesn't linger.
   const [liveReferenceVariant, setLiveReferenceVariant] = useState<ReferenceVariant>(null);
   const handleLiveChange = useCallback((live: boolean) => {
-    console.log('[debug] liveMode ->', live);
     setLiveMode(live);
     if (live) setLiveReferenceVariant(null);
-  }, []);
-  const handleShowReference = useCallback((variant: ReferenceVariant) => {
-    console.log('[debug] liveReferenceVariant ->', variant);
-    setLiveReferenceVariant(variant);
   }, []);
 
   // The 3D avatar stays mounted (for its audio/lip-sync engine — TTS
@@ -379,7 +374,7 @@ export default function OnboardingPage() {
                 onLiveChange={handleLiveChange}
                 onMicAnalyser={setMicAnalyser}
                 onAgentSpeakingChange={setAgentSpeaking}
-                onShowReference={handleShowReference}
+                onShowReference={setLiveReferenceVariant}
               />
             )}
 

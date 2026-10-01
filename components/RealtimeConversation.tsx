@@ -196,7 +196,6 @@ export default function RealtimeConversation({
               tool_call_id: string;
               parameters?: Record<string, unknown>;
             };
-            console.log('[debug] client_tool_call', tool_name, JSON.stringify(parameters));
 
             if (tool_name === 'show_reference') {
               const variant = parameters?.type;
@@ -255,8 +254,7 @@ export default function RealtimeConversation({
         setState('error');
       };
 
-      ws.onclose = (e) => {
-        console.log('[debug] ws closed code=' + e.code + ' reason=' + e.reason);
+      ws.onclose = () => {
         setState((prev) => (prev === 'live' || prev === 'connecting' ? 'idle' : prev));
         onLiveChange?.(false);
       };
